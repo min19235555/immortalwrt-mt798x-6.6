@@ -68,6 +68,7 @@
 		ethernet0 = &gmac1;
 		mmc0 = &sdhci;
 		mmc1 = &sdmmc;
+		rtc0 = &hym8563;
 	};
 
 	chosen {
@@ -106,7 +107,7 @@
 		regulator-boot-on;
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
-		vin-supply = <&vcc5v0_sys>;
+		vin-supply = <&vcc12v_dcin>;
 	};
 
 	/* 3.3V reference used by &gmac1 (phy-supply) on the CM5 module. */
@@ -185,6 +186,38 @@
 		enable-active-high;
 		vin-supply = <&vcc5v0_sys>;
 	};
+
+	/*
+	 * The measurements taken from the running device (vendor live DTS)
+	 * show two always-on control lines for the M.2 E-key Wi-Fi module.
+	 * Both are driven high at boot, matching the vendor firmware.
+	 */
+	wifi_disable: regulator-wifi-disable {
+		compatible = "regulator-fixed";
+		regulator-name = "wifi_disable";
+		gpio = <&gpio0 RK_PD4 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		regulator-boot-on;
+		regulator-always-on;
+	};
+
+	bt_wake: regulator-bt-wake {
+		compatible = "regulator-fixed";
+		regulator-name = "bt_wake";
+		gpio = <&gpio0 RK_PC6 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		regulator-boot-on;
+		regulator-always-on;
+	};
+
+	/* Carrier fan, PWM11 channel 0 on GPIO3_PD5 (pwm11m3). */
+	pwm_fan: pwm-fan {
+		compatible = "pwm-fan";
+		#cooling-cells = <2>;
+		cooling-levels = <0 64 128 192 255>;
+		pwms = <&pwm11 0 60000 0>;
+		status = "okay";
+	};
 };
 
 /*
@@ -195,12 +228,20 @@
 };
 
 /*
- * Onboard RTL8211F (1x GbE). The PHY, MDIO bus and RGMII delays are
- * described by rk3588s-radxa-cm5.dtsi; the carrier only adds the RJ45 and
- * the magnetics, so only the controller has to be enabled here.
+ * Onboard RTL8211F (1x GbE).
+ *
+ * The timing below is taken from the live vendor DTS of this board:
+ * RGMII delays are inserted by the MAC (tx 0x41 / rx 0x3a), the PHY is
+ * kept in plain "rgmii" mode, and PHY reset is GPIO3_PB2 active low.
  */
 &gmac1 {
 	status = "okay";
+	phy-mode = "rgmii";
+	tx_delay = <0x41>;
+	rx_delay = <0x3a>;
+	snps,reset-gpio = <&gpio3 RK_PB2 GPIO_ACTIVE_LOW>;
+	snps,reset-active-low;
+	snps,reset-delays-us = <0 20000 100000>;
 };
 
 /*
@@ -231,6 +272,9 @@
 	pinctrl-0 = <&pcie2x1l2_rst>;
 	reset-gpios = <&gpio3 RK_PD1 GPIO_ACTIVE_HIGH>;
 	vpcie3v3-supply = <&vcc3v3_pcie>;
+	/* ASM1184E is a PCIe 2.0 x1 switch. */
+	max-link-speed = <2>;
+	num-lanes = <1>;
 	status = "okay";
 };
 
@@ -394,6 +438,18 @@
 			};
 		};
 	};
+
+	hym8563: rtc@51 {
+		compatible = "haoyu,hym8563";
+		reg = <0x51>;
+		#clock-cells = <0>;
+		clock-output-names = "hym8563";
+		interrupt-parent = <&gpio0>;
+		interrupts = <RK_PB0 IRQ_TYPE_LEVEL_LOW>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&rtc_int_l>;
+		wakeup-source;
+	};
 };
 
 &usbdp_phy0 {
@@ -509,6 +565,13 @@
 	status = "okay";
 };
 
+/* Fan PWM, wired to GPIO3_PD5 (pwm11m3) on the carrier. */
+&pwm11 {
+	pinctrl-names = "active";
+	pinctrl-0 = <&pwm11m3_pins>;
+	status = "okay";
+};
+
 /*
  * Pin mux for the carrier control signals.
  * Adjust the GPIO numbers to the real schematic.
@@ -541,6 +604,12 @@
 
 		usbc0_int: usbc0-int {
 			rockchip,pins = <0 RK_PC4 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
+	rtc {
+		rtc_int_l: rtc-int-l {
+			rockchip,pins = <0 RK_PB0 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 };

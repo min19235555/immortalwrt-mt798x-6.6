@@ -8,7 +8,7 @@ on:
 
 concurrency:
   group: cm5-lite-build
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -53,10 +53,15 @@ jobs:
         run: |
           make -j"$(nproc)" download
 
+      - name: Compile target/linux (verbose)
+        run: |
+          set -o pipefail
+          make -j"$(nproc)" V=s target/linux/compile 2>&1 | tee target-linux.log
+
       - name: Build
         run: |
           set -o pipefail
-          make -j"$(nproc)" 2>&1 | tee build.log
+          make -j"$(nproc)" V=s 2>&1 | tee build.log
 
       - name: Upload firmware
         if: always()
@@ -70,10 +75,12 @@ jobs:
             bin/targets/rockchip/armv8/*.buildinfo
           if-no-files-found: warn
 
-      - name: Upload build log
+      - name: Upload build logs
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: build-log
-          path: build.log
+          path: |
+            target-linux.log
+            build.log
           if-no-files-found: warn
