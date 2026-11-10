@@ -812,3 +812,16 @@ CONFIG_XZ_DEC_BCJ=y
 CONFIG_ZLIB_DEFLATE=y
 CONFIG_ZLIB_INFLATE=y
 CONFIG_ZONE_DMA32=y
+
+# Extra kernel options for the Radxa CM5 Lite carrier.
+# The rockchip/armv8 config is headless by default, so DRM has to be
+# enabled explicitly for the DisplayPort output on the Type-C port.
+CONFIG_DRM=y
+CONFIG_DRM_KMS_HELPER=y
+CONFIG_DRM_GEM_DMA_HELPER=y
+CONFIG_DRM_DISPLAY_HELPER=y
+CONFIG_DRM_DISPLAY_DP_HELPER=y
+CONFIG_DRM_ROCKCHIP=y
+CONFIG_ROCKCHIP_DW_DP=y
+# Reset/power sequencing for the onboard VL817-Q7 USB3 hub.
+CONFIG_USB_ONBOARD_DEV=y
