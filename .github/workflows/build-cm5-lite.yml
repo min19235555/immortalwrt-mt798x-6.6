@@ -53,6 +53,16 @@ jobs:
         run: |
           make -j"$(nproc)" download
 
+      - name: Build host tools
+        run: |
+          set -o pipefail
+          make -j"$(nproc)" tools/compile 2>&1 | tee tools.log
+
+      - name: Build toolchain
+        run: |
+          set -o pipefail
+          make -j"$(nproc)" toolchain/compile 2>&1 | tee toolchain.log
+
       - name: Compile target/linux (verbose)
         run: |
           set -o pipefail
@@ -61,7 +71,7 @@ jobs:
       - name: Build
         run: |
           set -o pipefail
-          make -j"$(nproc)" V=s 2>&1 | tee build.log
+          make -j"$(nproc)" 2>&1 | tee build.log
 
       - name: Upload firmware
         if: always()
@@ -81,6 +91,8 @@ jobs:
         with:
           name: build-log
           path: |
+            tools.log
+            toolchain.log
             target-linux.log
             build.log
           if-no-files-found: warn
