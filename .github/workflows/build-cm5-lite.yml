@@ -68,6 +68,11 @@ jobs:
           set -o pipefail
           make -j"$(nproc)" V=s target/linux/compile 2>&1 | tee target-linux.log
 
+      - name: Compile kernel modules (verbose)
+        run: |
+          set -o pipefail
+          make -j"$(nproc)" V=s package/kernel/linux/compile 2>&1 | tee kmod.log
+
       - name: Build
         run: |
           set -o pipefail
@@ -94,5 +99,7 @@ jobs:
             tools.log
             toolchain.log
             target-linux.log
+            kmod.log
             build.log
+            logs/**
           if-no-files-found: warn
