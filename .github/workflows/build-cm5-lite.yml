@@ -63,15 +63,6 @@ jobs:
           set -o pipefail
           make -j"$(nproc)" toolchain/compile 2>&1 | tee toolchain.log
 
-      - name: Prepare kernel and resolve config
-        run: |
-          set -o pipefail
-          make -j"$(nproc)" V=s target/linux/prepare 2>&1 | tee target-prepare.log
-          KDIR=$(echo build_dir/target-*/linux-rockchip_armv8/linux-*)
-          echo "kernel dir: $KDIR"
-          make -C "$KDIR" ARCH=arm64 olddefconfig
-          grep -E 'CONFIG_(DRM_ROCKCHIP|ROCKCHIP_VOP|ROCKCHIP_VOP2|ROCKCHIP_DW_DP|DRM_DW_DP|USB_ONBOARD_DEV)=' "$KDIR/.config" || true
-
       - name: Compile target/linux (verbose)
         run: |
           set -o pipefail
@@ -102,7 +93,6 @@ jobs:
           path: |
             tools.log
             toolchain.log
-            target-prepare.log
             target-linux.log
             build.log
           if-no-files-found: warn
