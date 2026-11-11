@@ -73,6 +73,11 @@ jobs:
           set -o pipefail
           make -j"$(nproc)" V=s package/kernel/linux/compile 2>&1 | tee kmod.log
 
+      - name: Install packages
+        run: |
+          set -o pipefail
+          make -j"$(nproc)" package/install 2>&1 | tee package-install.log
+
       - name: Install target (verbose)
         run: |
           set -o pipefail
@@ -105,6 +110,7 @@ jobs:
             toolchain.log
             target-linux.log
             kmod.log
+            package-install.log
             target-install.log
             build.log
             logs/**
