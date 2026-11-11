@@ -74,10 +74,15 @@ jobs:
           set -o pipefail
           make -j"$(nproc)" V=s package/kernel/linux/compile 2>&1 | tee kmod.log
 
+      - name: Compile U-Boot (verbose)
+        run: |
+          set -o pipefail
+          make -j"$(nproc)" V=s package/boot/uboot-rockchip/compile 2>&1 | tee uboot.log
+
       - name: Install packages
         run: |
           set -o pipefail
-          make -j"$(nproc)" package/install 2>&1 | tee package-install.log
+          make -j"$(nproc)" V=s package/install 2>&1 | tee package-install.log
 
       - name: Install target (verbose)
         run: |
@@ -111,6 +116,7 @@ jobs:
             toolchain.log
             target-linux.log
             kmod.log
+            uboot.log
             package-install.log
             target-install.log
             build.log
