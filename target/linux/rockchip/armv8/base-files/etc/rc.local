@@ -1,0 +1,105 @@
+#!/bin/sh
+# CM5 Lite debug helper: dump boot state to the boot card's kernel partition.
+# Executed by /etc/init.d/done after network/services are up.
+
+LOG=/tmp/cm5-debug.log
+BOOTMNT=/tmp/cm5boot
+
+mkdir -p "$BOOTMNT"
+mount -t debugfs none /sys/kernel/debug 2>/dev/null
+
+{
+	echo "=== meta ==="
+	date
+	uname -a
+	echo "model: $(cat /proc/device-tree/model 2>/dev/null)"
+	echo "cmdline: $(cat /proc/cmdline)"
+	echo
+	echo "=== /etc/config/network ==="
+	cat /etc/config/network 2>&1
+	echo
+	echo "=== /etc/board.json ==="
+	cat /etc/board.json 2>&1
+	echo
+	echo "=== ip link ==="
+	ip link 2>&1
+	echo
+	echo "=== ip addr ==="
+	ip addr 2>&1
+	echo
+	echo "=== ip route ==="
+	ip route 2>&1
+	echo
+	echo "=== netdev t0 ==="
+	cat /proc/net/dev
+	sleep 5
+	echo "=== netdev t1 ==="
+	cat /proc/net/dev
+	echo
+	echo "=== interfaces ==="
+	for i in /sys/class/net/*; do
+		n=$(basename "$i")
+		echo "--- $n"
+		echo "carrier: $(cat "$i/carrier" 2>/dev/null)"
+		echo "operstate: $(cat "$i/operstate" 2>/dev/null)"
+		echo "speed: $(cat "$i/speed" 2>/dev/null)"
+		echo "duplex: $(cat "$i/duplex" 2>/dev/null)"
+		echo "mac: $(cat "$i/address" 2>/dev/null)"
+		echo "device: $(readlink "$i/device" 2>/dev/null)"
+	done
+	echo
+	echo "=== pci ==="
+	for d in /sys/bus/pci/devices/*; do
+		[ -e "$d" ] || continue
+		echo "$(basename "$d") vendor=$(cat "$d/vendor" 2>/dev/null) device=$(cat "$d/device" 2>/dev/null) class=$(cat "$d/class" 2>/dev/null) driver=$(basename "$(readlink "$d/driver" 2>/dev/null)" 2>/dev/null) link=$(cat "$d/current_link_speed" 2>/dev/null)/$(cat "$d/current_link_width" 2>/dev/null)"
+	done
+	echo
+	echo "=== usb ==="
+	for d in /sys/bus/usb/devices/*; do
+		[ -e "$d" ] || continue
+		echo "$(basename "$d") idVendor=$(cat "$d/idVendor" 2>/dev/null) idProduct=$(cat "$d/idProduct" 2>/dev/null) product=$(cat "$d/product" 2>/dev/null) driver=$(basename "$(readlink "$d/driver" 2>/dev/null)" 2>/dev/null)"
+	done
+	echo
+	echo "=== regulators ==="
+	for r in /sys/class/regulator/*; do
+		echo "$(basename "$r") $(cat "$r/name" 2>/dev/null) state=$(cat "$r/state" 2>/dev/null) microvolts=$(cat "$r/microvolts" 2>/dev/null)"
+	done
+	[ -f /sys/kernel/debug/regulator/regulator_summary ] && cat /sys/kernel/debug/regulator/regulator_summary
+	echo
+	echo "=== gpio ==="
+	cat /sys/kernel/debug/gpio 2>&1
+	echo
+	echo "=== modules ==="
+	cat /proc/modules
+	echo
+	echo "=== processes ==="
+	ps 2>&1
+	echo
+	echo "=== logread ==="
+	logread 2>&1 | tail -n 200
+	echo
+	echo "=== ubus lan ==="
+	ubus call network.interface.lan status 2>&1
+	echo
+	echo "=== leases ==="
+	cat /tmp/dhcp.leases 2>&1
+	echo
+	echo "=== dmesg ==="
+	dmesg
+} > "$LOG" 2>&1
+
+for p in /dev/mmcblk*p1 /dev/sd*a1 /dev/nvme*n1p1; do
+	[ -b "$p" ] || continue
+	if mount -t ext4 -o rw "$p" "$BOOTMNT" 2>/dev/null || mount -o rw "$p" "$BOOTMNT" 2>/dev/null; then
+		if [ -f "$BOOTMNT/boot.scr" ]; then
+			{
+				echo "=== log copied from $p ==="
+				cat "$LOG"
+			} > "$BOOTMNT/cm5-debug.log"
+			sync
+		fi
+		umount "$BOOTMNT"
+	fi
+done
+
+exit 0

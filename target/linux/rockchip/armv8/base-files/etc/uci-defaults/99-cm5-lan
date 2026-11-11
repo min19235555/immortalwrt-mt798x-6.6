@@ -1,0 +1,28 @@
+#!/bin/sh
+# Make sure br-lan contains the on-board RTL8211F (gmac1), regardless of the
+# ethN name the kernel picked. The PCIe RTL8125B ports enumerate later and may
+# otherwise take eth0/eth1.
+
+lanif=""
+for i in /sys/class/net/*; do
+	dev=$(basename "$i")
+	[ "$dev" = "lo" ] && continue
+	[ -e "$i/device" ] || continue
+	case "$(readlink "$i/device")" in
+		*fe1c0000.ethernet*) lanif="$dev" ;;
+	esac
+done
+
+[ -n "$lanif" ] || exit 0
+
+idx=0
+while uci -q get "network.@device[$idx]" >/dev/null 2>&1; do
+	if [ "$(uci -q get "network.@device[$idx].name")" = "br-lan" ]; then
+		uci -q delete "network.@device[$idx].ports"
+		uci -q add_list "network.@device[$idx].ports=$lanif"
+	fi
+	idx=$((idx + 1))
+done
+uci -q commit network
+
+exit 0
