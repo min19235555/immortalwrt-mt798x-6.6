@@ -339,10 +339,24 @@ endef
 
 $(eval $(call KernelPackage,video-rockchip-rkvenc))
 
+define KernelPackage/drm-aux-bridge
+  SUBMENU:=$(VIDEO_MENU)
+  TITLE:=DRM auxiliary bridge helper
+  KCONFIG:=CONFIG_DRM_AUX_BRIDGE
+  FILES:=$(LINUX_DIR)/drivers/gpu/drm/bridge/aux-bridge.ko
+endef
+
+define KernelPackage/drm-aux-bridge/description
+  Transparent DRM bridge used by non-DRM drivers to build bridge chains,
+  e.g. the Rockchip USBDP combo PHY with DP alt-mode support.
+endef
+
+$(eval $(call KernelPackage,drm-aux-bridge))
+
 define KernelPackage/phy-rockchip-usbdp
   SUBMENU:=$(USB_MENU)
   TITLE:=Rockchip USBDP COMBO PHY Driver
-  DEPENDS:=@TARGET_rockchip_armv8
+  DEPENDS:=@TARGET_rockchip_armv8 +kmod-drm-aux-bridge
   KCONFIG:=CONFIG_PHY_ROCKCHIP_USBDP
   FILES:=$(LINUX_DIR)/drivers/phy/rockchip/phy-rockchip-usbdp.ko
   AUTOLOAD:=$(call AutoProbe,phy-rockchip-usbdp)
