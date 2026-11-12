@@ -77,8 +77,7 @@ platform_do_upgrade() {
     xiaomi,mi-router-wr30u-ubootmod|\
 	h3c,magic-nx30-pro|\
 	jcg,q30-pro|\
-    qihoo,360t7|\
-	cpe,ykm)
+    qihoo,360t7)
 		CI_UBIPART="ubi"
     		CI_KERNPART="kernel"
       		CI_ROOTPART="rootfs"
@@ -163,6 +162,10 @@ platform_do_upgrade() {
 	wavlink,wl-wn573hx3)
 		default_do_upgrade "$1"
 		;;
+	cpe,ykm)
+		PART_NAME="ubi"
+		default_do_upgrade "$1"
+		;;
 	dlink,aquila-pro-ai-m30-a1|\
 	dlink,aquila-pro-ai-m60-a1)
 		fw_setenv sw_tryactive 0
@@ -224,6 +227,13 @@ platform_check_image() {
 	[ "$#" -gt 1 ] && return 1
 
 	case "$board" in
+	cpe,ykm)
+		[ "$magic" != "55424923" ] && {
+			echo "Invalid image type."
+			return 1
+		}
+		return 0
+		;;
 	bananapi,bpi-r3|\
 	bananapi,bpi-r3-mini|\
 	bananapi,bpi-r4|\
