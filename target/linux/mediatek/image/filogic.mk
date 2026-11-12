@@ -769,6 +769,26 @@ define Device/comfast_cf-e393ax
 endef
 TARGET_DEVICES += comfast_cf-e393ax
 
+define Device/cpe_ykm
+  DEVICE_VENDOR := CPE
+  DEVICE_MODEL := YKM 5G CPE
+  DEVICE_DTS := mt7981-cpe-ykm
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_PACKAGES := kmod-mt_wifi mtwifi-cfg luci-app-mtwifi-cfg kmod-usb3 \
+	qmodem qmodem_monitor luci-app-qmodem luci-app-qmodem-sms luci-app-qmodem-ttl
+  BLOCKSIZE := 64k
+  PAGESIZE := 1
+  SUBPAGESIZE := 1
+  VID_HDR_OFFSET := 64
+  IMAGE_SIZE := 31872k
+  KERNEL_IN_UBI := 1
+  IMAGES := sysupgrade.bin
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  DEVICE_COMPAT_VERSION := 2.0
+  DEVICE_COMPAT_MESSAGE := Flash layout changed to UBI for the new U-Boot
+endef
+TARGET_DEVICES += cpe_ykm
+
 define Device/confiabits_mt7981
   DEVICE_VENDOR := Confiabits
   DEVICE_MODEL := MT7981
