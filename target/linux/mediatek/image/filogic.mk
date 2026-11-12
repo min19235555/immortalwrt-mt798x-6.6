@@ -775,7 +775,7 @@ define Device/cpe_ykm
   DEVICE_DTS := mt7981-cpe-ykm
   DEVICE_DTS_DIR := ../dts
   DEVICE_PACKAGES := kmod-mt_wifi mtwifi-cfg luci-app-mtwifi-cfg kmod-usb3 \
-	qmodem qmodem_monitor ndisc6 luci-app-qmodem luci-app-qmodem-sms luci-app-qmodem-ttl
+	qmodem qmodem_monitor luci-app-qmodem luci-app-qmodem-sms luci-app-qmodem-ttl
   BLOCKSIZE := 64k
   PAGESIZE := 1
   SUBPAGESIZE := 1
