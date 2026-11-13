@@ -1,28 +1,52 @@
 #!/bin/sh
-# Make sure br-lan contains the on-board RTL8211F (gmac1), regardless of the
-# ethN name the kernel picked. The PCIe RTL8125B ports enumerate later and may
-# otherwise take eth0/eth1.
+# Radxa CM5 Lite carrier fixups, run once on first boot:
+#  1. put the on-board RTL8211F (gmac1) AND both RTL8125B ports into br-lan
+#  2. give the two RTL8125B stable MAC addresses (their OTP has no MAC)
 
 lanif=""
 for i in /sys/class/net/*; do
-	dev=$(basename "$i")
+	dev=${i##*/}
 	[ "$dev" = "lo" ] && continue
 	[ -e "$i/device" ] || continue
 	case "$(readlink "$i/device")" in
 		*fe1c0000.ethernet*) lanif="$dev" ;;
 	esac
 done
-
-[ -n "$lanif" ] || exit 0
+[ -n "$lanif" ] || lanif="eth0"
 
 idx=0
 while uci -q get "network.@device[$idx]" >/dev/null 2>&1; do
 	if [ "$(uci -q get "network.@device[$idx].name")" = "br-lan" ]; then
 		uci -q delete "network.@device[$idx].ports"
-		uci -q add_list "network.@device[$idx].ports=$lanif"
+		for p in "$lanif" eth1 eth2; do
+			[ -d "/sys/class/net/$p" ] || continue
+			uci -q add_list "network.@device[$idx].ports=$p"
+		done
 	fi
 	idx=$((idx + 1))
 done
+
+# Derive stable locally-administered MACs from the SoC serial number.
+sn=$(tr -d '\000' < /proc/device-tree/serial-number 2>/dev/null | tr 'A-Z' 'a-z')
+case "$sn" in *[!0-9a-f]*) sn="" ;; esac
+[ ${#sn} -ge 10 ] || sn="0badc0de00"
+h=${sn#"${sn%??????????}"}
+mac1="02:$(echo "$h" | sed 's/../&:/g; s/:$//')"
+last=${mac1##*:}
+n=$((0x$last))
+[ "$n" -lt 255 ] || n=0
+mac2="${mac1%:*}:$(printf '%02x' $((n + 1)))"
+
+for spec in "eth1 $mac1" "eth2 $mac2"; do
+	set -- $spec
+	[ -d "/sys/class/net/$1" ] || continue
+	uci -q batch <<-EOF
+		add network device
+		set network.@device[-1].name='$1'
+		set network.@device[-1].macaddr='$2'
+	EOF
+done
+
 uci -q commit network
 
 exit 0

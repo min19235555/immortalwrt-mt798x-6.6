@@ -409,7 +409,10 @@ define Device/radxa_cm5_lite_asm1184e
   DEVICE_MODEL := CM5 Lite (ASM1184E carrier)
   DEVICE_DTS := rk3588s-radxa-cm5-lite-asm1184e
   UBOOT_DEVICE_NAME := generic-rk3588
-  DEVICE_PACKAGES += kmod-r8125 kmod-mt7921e kmod-hwmon-pwmfan kmod-usb-net-cdc-mbim kmod-usb-net-qmi-wwan kmod-usb-serial-option uqmi
+  DEVICE_PACKAGES += kmod-r8125 kmod-mt7921e wpad-basic-mbedtls kmod-hwmon-pwmfan \
+	kmod-mhi-bus kmod-mhi-pci-generic kmod-mtk-t7xx kmod-mhi-wwan-ctrl kmod-mhi-wwan-mbim \
+	kmod-wwan kmod-usb-net-cdc-mbim kmod-usb-net-qmi-wwan kmod-usb-serial-option uqmi \
+	qmodem luci-app-qmodem-next
   SUPPORTED_DEVICES := radxa,cm5-lite-asm1184e
 endef
 TARGET_DEVICES += radxa_cm5_lite_asm1184e
