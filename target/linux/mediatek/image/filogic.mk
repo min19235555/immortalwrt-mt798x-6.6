@@ -782,10 +782,9 @@ define Device/cpe_ykm
   VID_HDR_OFFSET := 64
   IMAGE_SIZE := 31872k
   KERNEL_IN_UBI := 1
-  IMAGES := sysupgrade.bin
-  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
-  DEVICE_COMPAT_VERSION := 2.0
-  DEVICE_COMPAT_MESSAGE := Flash layout changed to UBI for the new U-Boot
+  IMAGES := sysupgrade.bin factory.bin
+  IMAGE/sysupgrade.bin := append-ubi | check-size $$$$(IMAGE_SIZE)
+  IMAGE/factory.bin := append-ubi | check-size $$$$(IMAGE_SIZE)
 endef
 TARGET_DEVICES += cpe_ykm
 

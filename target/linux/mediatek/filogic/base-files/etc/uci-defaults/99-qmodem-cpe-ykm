@@ -1,0 +1,12 @@
+#!/bin/sh
+
+. /lib/functions.sh
+
+[ "$(board_name)" = "cpe,ykm" ] || exit 0
+
+# This board has no PCIe slot; only scan USB modems.
+uci -q set qmodem.main.enable_pcie_scan='0'
+uci -q set qmodem.main.try_preset_pcie='0'
+uci -q commit qmodem
+
+exit 0
