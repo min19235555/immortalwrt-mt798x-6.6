@@ -24,7 +24,7 @@ setenv bootargs "coherent_pool=2M console=tty1 console=${serial_port},1500000 ea
 # 8 MiB BARs can never be allocated afterwards ("can't assign; no space"),
 # because the root port windows are already sized for the other devices.
 # Waiting here makes all four downstream devices present during enumeration.
-sleep 15
+sleep 20
 
 load ${devtype} ${devnum}:1 ${kernel_addr_r} kernel.img
 

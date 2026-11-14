@@ -29,6 +29,16 @@ start() {
 		fi
 		touch "$DIR/running"
 
+		# Recover the previous boot's kernel messages from ramoops.
+		if [ -d /sys/fs/pstore ]; then
+			for f in /sys/fs/pstore/*; do
+				[ -f "$f" ] || continue
+				mkdir -p "$DIR/pstore-$cnt"
+				cat "$f" > "$DIR/pstore-$cnt/${f##*/}" 2>/dev/null
+			done
+			rm -f /sys/fs/pstore/* 2>/dev/null
+		fi
+
 		{
 			echo "===== boot #$cnt date=$(date) uptime=$(cut -d. -f1 /proc/uptime)s"
 			echo "--- model: $(tr -d '\000' < /proc/device-tree/model 2>/dev/null)"

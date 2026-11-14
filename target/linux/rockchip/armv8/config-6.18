@@ -842,3 +842,10 @@ CONFIG_ROCKCHIP_DW_DP=y
 
 # relay: required by mtk_t7xx (MTK T700 5G modem)
 CONFIG_RELAY=y
+
+# pstore/ramoops: keep the last kernel messages across a warm reset so a
+# watchdog reboot on this board can be diagnosed without a serial header
+CONFIG_PSTORE=y
+CONFIG_PSTORE_CONSOLE=y
+CONFIG_PSTORE_PMSG=y
+CONFIG_PSTORE_RAM=y

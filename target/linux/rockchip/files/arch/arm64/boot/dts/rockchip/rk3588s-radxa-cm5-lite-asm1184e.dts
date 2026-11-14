@@ -76,6 +76,32 @@
 	};
 
 	/*
+	 * Ramoops "black box".
+	 *
+	 * This carrier has no TTL header and, once the 5G modem is fitted, the
+	 * machine resets before the network comes up, so the last kernel
+	 * messages cannot be collected any other way. Reserving 1 MiB of RAM
+	 * keeps them across a warm reset (watchdog/panic) and they show up in
+	 * /sys/fs/pstore on the next boot.
+	 *
+	 * Placed just below the 16 MiB CMA region at 0xef000000.
+	 */
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		ramoops: ramoops@ec000000 {
+			compatible = "ramoops";
+			reg = <0x0 0xec000000 0x0 0x00100000>;
+			no-map;
+			record-size = <0x00020000>;
+			console-size = <0x00080000>;
+			pmsg-size = <0x00020000>;
+		};
+	};
+
+	/*
 	 * Power tree
 	 *
 	 * DC input silkscreen is "DC7-24V" (2-pin). It is modelled as a
