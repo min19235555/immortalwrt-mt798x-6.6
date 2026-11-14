@@ -28,10 +28,34 @@ key="12345678"
 i=0
 while radio=$(uci -q get "wireless.@wifi-device[$i]"); do
 	[ -n "$radio" ] || break
+	band=$(uci -q get "wireless.$radio.band")
+	hwmode=$(uci -q get "wireless.$radio.hwmode")
+	[ -n "$band" ] || {
+		case "$hwmode" in
+			11a) band="5g" ;;
+			11g) band="2g" ;;
+		esac
+	}
 	uci set "wireless.$radio.disabled=0"
 	uci set "wireless.$radio.country=CN"
-	uci set "wireless.$radio.channel=auto"
 	uci set "wireless.$radio.macaddr=$(inc_mac "$base" $((0x10 + i)))"
+	case "$band" in
+		5g|6g)
+			# MT7922 (AX5400): 2x2 HE160 -> 4804 Mbps on 5 GHz
+			uci set "wireless.$radio.band=$band"
+			uci set "wireless.$radio.htmode=HE160"
+			# 160 MHz needs a fixed, non-DFS channel to come up reliably
+			uci set "wireless.$radio.channel=36"
+			;;
+		2g)
+			uci set "wireless.$radio.band=2g"
+			uci set "wireless.$radio.htmode=HE40"
+			uci set "wireless.$radio.channel=auto"
+			;;
+		*)
+			uci set "wireless.$radio.channel=auto"
+			;;
+	esac
 	i=$((i + 1))
 done
 
