@@ -839,3 +839,6 @@ CONFIG_ROCKCHIP_DW_DP=y
 # CONFIG_ROCKCHIP_LVDS is not set
 # CONFIG_ROCKCHIP_RGB is not set
 # CONFIG_ROCKCHIP_RK3066_HDMI is not set
+
+# relay: required by mtk_t7xx (MTK T700 5G modem)
+CONFIG_RELAY=y

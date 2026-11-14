@@ -272,6 +272,18 @@
 	pinctrl-0 = <&pcie2x1l2_rst>;
 	reset-gpios = <&gpio3 RK_PD1 GPIO_ACTIVE_HIGH>;
 	vpcie3v3-supply = <&vcc3v3_pcie>;
+	/*
+	 * The 5G modem (MTK T700) exposes an 8 MiB non-prefetchable BAR that
+	 * needs 8 MiB alignment. With the default 14 MiB window
+	 * (0xf4200000..0xf4ffffff) the resource allocator cannot place it
+	 * once the modem is fitted, so the RTL8125B BARs are left unassigned
+	 * ("region #1 not an MMIO resource") and both 2.5G ports disappear.
+	 * No other PCIe controller is enabled on this carrier, so the window
+	 * can be extended to 32 MiB.
+	 */
+	ranges = <0x01000000 0x0 0xf4100000 0x0 0xf4100000 0x0 0x00100000>,
+		 <0x02000000 0x0 0xf4200000 0x0 0xf4200000 0x0 0x02000000>,
+		 <0x03000000 0x0 0x40000000 0xa 0x0 0x0 0x40000000>;
 	/* ASM1184E is a PCIe 2.0 x1 switch. */
 	max-link-speed = <2>;
 	num-lanes = <1>;
