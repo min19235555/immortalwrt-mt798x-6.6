@@ -1,0 +1,37 @@
+#!/bin/sh /etc/rc.common
+# Radxa CM5 Lite (ASM1184E carrier)
+#
+# The MTK T700 5G modem behind the ASM1184E switch needs a few seconds after
+# power-on before its PCIe link trains. On a cold boot the switch downstream
+# port is usually not ready yet, so the modem is not enumerated and mtk_t7xx
+# never binds (no /dev/wwan*).
+#
+# Retry a bounded number of PCIe rescans until the modem shows up, then ask
+# QModem to rescan its slots. Continuous rescans are avoided on purpose:
+# they churn the bridge windows and used to knock the RTL8125B NICs off.
+
+START=99
+STOP=10
+
+start() {
+	(
+		sleep 15
+		i=0
+		while [ $i -lt 6 ]; do
+			[ -e /sys/bus/pci/devices/0004:43:00.0 ] && break
+			logger -t pcie-rescan "modem not present, rescanning PCIe (try $((i + 1)))"
+			echo 1 > /sys/bus/pci/rescan
+			sleep 10
+			i=$((i + 1))
+		done
+		if [ -e /sys/bus/pci/devices/0004:43:00.0 ]; then
+			logger -t pcie-rescan "modem present: $(cat /sys/bus/pci/devices/0004:43:00.0/device 2>/dev/null)"
+		fi
+		sleep 3
+		[ -x /usr/bin/modem_scanc ] && /usr/bin/modem_scanc scan pcie 0 >/dev/null 2>&1
+	) &
+}
+
+stop() {
+	:
+}
