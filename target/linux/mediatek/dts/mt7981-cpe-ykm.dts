@@ -163,7 +163,7 @@
 
 			factory: partition@50000 {
 				label = "factory";
-				reg = <0x50000 0x8000>;
+				reg = <0x50000 0x10000>;
 				read-only;
 
 				nvmem-layout {
@@ -187,12 +187,6 @@
 						#nvmem-cell-cells = <1>;
 					};
 				};
-			};
-
-			partition@58000 {
-				label = "bdinfo";
-				reg = <0x58000 0x8000>;
-				read-only;
 			};
 
 			partition@60000 {
