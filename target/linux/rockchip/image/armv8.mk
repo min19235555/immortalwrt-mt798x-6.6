@@ -414,7 +414,7 @@ define Device/radxa_cm5_lite_asm1184e
 	kmod-wwan kmod-usb-net-cdc-mbim kmod-usb-net-qmi-wwan kmod-usb-serial-option uqmi \
 	qmodem luci-app-qmodem-next \
 	luci-i18n-base-zh-cn luci-i18n-firewall-zh-cn luci-i18n-package-manager-zh-cn \
-	luci-i18n-qmodem-next-zh-cn
+	luci-i18n-qmodem-next-zh-cn pciutils
   SUPPORTED_DEVICES := radxa,cm5-lite-asm1184e
 endef
 TARGET_DEVICES += radxa_cm5_lite_asm1184e
