@@ -50,6 +50,12 @@ jobs:
           echo '--- selected device ---'
           grep -E 'CONFIG_TARGET_rockchip_armv8_DEVICE|CONFIG_PACKAGE_luci=' .config
 
+      - name: Patch QModem (no destructive PCIe rescan)
+        run: |
+          f=feeds/qmodem/application/modem_scan/src/modem_scand.c
+          sed -i 's|open("/sys/bus/pci/rescan", O_WRONLY)|open("/nonexistent/qmodem-no-rescan", O_WRONLY)|' "$f"
+          grep -n "no-rescan" "$f"
+
       - name: Download sources
         run: |
           make -j"$(nproc)" download
