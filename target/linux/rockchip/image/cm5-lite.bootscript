@@ -16,7 +16,7 @@ elif test $soc = 'rk3588'; then
 	serial_addr=',0xfeb50000'; serial_port='ttyS2';
 fi
 
-setenv bootargs "coherent_pool=2M console=tty1 console=${serial_port},1500000 earlycon=uart8250,mmio32${serial_addr} root=PARTUUID=${uuid} rw rootwait pci=realloc";
+setenv bootargs "coherent_pool=2M console=tty1 console=${serial_port},1500000 earlycon=uart8250,mmio32${serial_addr} root=PARTUUID=${uuid} rw rootwait pci=realloc pcie_aspm=off";
 
 # Radxa CM5 Lite carrier (ASM1184E + MTK T700 5G modem):
 # the modem needs several seconds after power-on before its PCIe link trains.
