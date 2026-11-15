@@ -85,6 +85,11 @@ jobs:
           set -o pipefail
           make -j"$(nproc)" V=s package/boot/uboot-rockchip/compile 2>&1 | tee uboot.log
 
+      - name: Probe sprd-pcie (verbose, fail fast)
+        run: |
+          set -o pipefail
+          make -j1 V=s package/kernel/sprd-pcie/compile 2>&1 | tail -250
+
       - name: Compile all packages
         run: |
           set -o pipefail
