@@ -17,8 +17,6 @@ PKG_SOURCE_DATE:=2026-05-31
 PKG_SOURCE_VERSION:=35c32481633f6f703a3d76390099c2794d52a5fb
 PKG_MIRROR_HASH:=skip
 
-STAMP_CONFIGURED_DEPENDS := $(STAGING_DIR)/usr/include/kernel_version.mk
-
 include $(INCLUDE_DIR)/package.mk
 
 define KernelPackage/sprd-pcie
