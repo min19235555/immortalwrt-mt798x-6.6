@@ -411,6 +411,7 @@ define Device/radxa_cm5_lite_asm1184e
   UBOOT_DEVICE_NAME := generic-rk3588
   BOOT_SCRIPT := cm5-lite
   DEVICE_PACKAGES += kmod-r8125 kmod-mt7921e wpad-basic-mbedtls kmod-hwmon-pwmfan kmod-pcie_mhi \
+	kmod-sprd-pcie \
 	kmod-mhi-bus kmod-mhi-pci-generic kmod-mtk-t7xx kmod-mhi-wwan-ctrl kmod-mhi-wwan-mbim \
 	kmod-wwan kmod-usb-net-cdc-mbim kmod-usb-net-qmi-wwan kmod-usb-serial-option uqmi \
 	qmodem luci-app-qmodem-next \
