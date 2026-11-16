@@ -39,12 +39,6 @@ jobs:
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
-          # Patch luci-theme-alpha: remove non-existent +luci-app-alpha-config dep
-          if [ -f feeds/alpha-theme/Makefile ]; then
-            sed -i 's|DEPENDS:=+libc +luci-app-alpha-config|DEPENDS:=+libc|' feeds/alpha-theme/Makefile
-            echo 'Patched luci-theme-alpha DEPENDS'
-          fi
-
           cat > .config <<'EOF'
           CONFIG_TARGET_rockchip=y
           CONFIG_TARGET_rockchip_armv8=y
@@ -78,6 +72,7 @@ jobs:
           CONFIG_PACKAGE_luci-theme-argon=y
           CONFIG_PACKAGE_luci-theme-bootstrap=y
           CONFIG_PACKAGE_luci-theme-alpha=y
+          CONFIG_PACKAGE_luci-app-alpha-config=y
           CONFIG_PACKAGE_luci-theme-aurora=y
 
           # === 科学上网 ===
@@ -179,7 +174,7 @@ jobs:
           echo '--- selected themes ---'
           grep -E 'CONFIG_PACKAGE_luci-theme-(argon|bootstrap|alpha|aurora)' .config
           echo '--- selected packages ---'
-          grep '=y' .config | grep -E 'CONFIG_PACKAGE_(openclash|passwall|argon|bootstrap|alpha|aurora|smartdns|wireguard|frps|zerotier|xray|hysteria|sing-box|sqm|docker)' | sort
+          grep '=y' .config | grep -E 'CONFIG_PACKAGE_(openclash|passwall|argon|bootstrap|alpha-config|alpha|aurora|smartdns|wireguard|frps|zerotier|xray|hysteria|sing-box|sqm|docker)' | sort
 
       - name: Patch QModem (no destructive PCIe rescan)
         run: |
