@@ -36,8 +36,17 @@ jobs:
 
       - name: Configure firmware
         run: |
+          # Official feeds
           ./scripts/feeds update -a
           ./scripts/feeds install -a
+
+          # External theme feeds (clone manually - avoids feeds.conf parser quirks)
+          mkdir -p feeds
+          git clone --depth 1 https://github.com/derisamedia/luci-theme-alpha.git feeds/alpha 2>&1 | tail -3
+          git clone --depth 1 https://github.com/animegasan/luci-app-alpha-config.git feeds/alpha-config 2>&1 | tail -3
+          git clone --depth 1 https://github.com/eamonxg/luci-theme-aurora.git feeds/aurora 2>&1 | tail -3
+          echo 'External feeds cloned'
+          ls -la feeds/ | grep -E 'alpha|aurora'
 
           cat > .config <<'EOF'
           CONFIG_TARGET_rockchip=y
