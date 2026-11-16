@@ -43,7 +43,7 @@ jobs:
           CONFIG_TARGET_rockchip_armv8=y
           CONFIG_TARGET_rockchip_armv8_DEVICE_radxa_cm5_lite_asm1184e=y
           CONFIG_TARGET_KERNEL_PARTSIZE=64
-          CONFIG_TARGET_ROOTFS_PARTSIZE=512
+          CONFIG_TARGET_ROOTFS_PARTSIZE=1024
 
           # === LuCI 基础 ===
           CONFIG_PACKAGE_luci=y
@@ -70,26 +70,17 @@ jobs:
           # === 主题 ===
           CONFIG_PACKAGE_luci-theme-argon=y
           CONFIG_PACKAGE_luci-theme-bootstrap=y
-          CONFIG_PACKAGE_luci-theme-material=y
-          CONFIG_PACKAGE_luci-theme-edge=y
-          CONFIG_PACKAGE_luci-theme-alpha=y
-          CONFIG_PACKAGE_luci-theme-aurora=y
 
           # === 科学上网 ===
           CONFIG_PACKAGE_luci-app-openclash=y
           CONFIG_PACKAGE_luci-app-passwall=y
 
-          # === 内网测速 homebox ===
-          CONFIG_PACKAGE_homebox=y
-
-          # === 广告过滤 / DNS ===
+          # === DNS/广告过滤 ===
           CONFIG_PACKAGE_luci-app-smartdns=y
-          CONFIG_PACKAGE_luci-app-adguardhome=y
-          CONFIG_PACKAGE_luci-app-redirect=y
           CONFIG_PACKAGE_smartdns=y
-          CONFIG_PACKAGE_adguardhome=y
+          CONFIG_PACKAGE_dnsproxy=y
 
-          # === WireGuard / VPN ===
+          # === WireGuard / Zerotier ===
           CONFIG_PACKAGE_kmod-wireguard=y
           CONFIG_PACKAGE_luci-app-wireguard=y
           CONFIG_PACKAGE_luci-app-zerotier=y
@@ -102,7 +93,6 @@ jobs:
           CONFIG_PACKAGE_wget=y
           CONFIG_PACKAGE_curl=y
           CONFIG_PACKAGE_bash=y
-          CONFIG_PACKAGE_busybox=y
           CONFIG_PACKAGE_openssh-sftp-server=y
           CONFIG_PACKAGE_tcpdump=y
           CONFIG_PACKAGE_iperf3=y
@@ -116,7 +106,6 @@ jobs:
           CONFIG_PACKAGE_kmod-docker-netlink=y
           CONFIG_PACKAGE_kmod-docker-bpf=y
           CONFIG_PACKAGE_pdnsd=y
-          CONFIG_PACKAGE_dnsproxy=y
 
           # === 核心系统包 ===
           CONFIG_PACKAGE_kmod-rtl8821cu=y
@@ -137,23 +126,14 @@ jobs:
           CONFIG_PACKAGE_kmod-nft-nat6=y
 
           # === 额外内核模块 ===
-          CONFIG_PACKAGE_kmod-nft-synproxy=y
-          CONFIG_PACKAGE_kmod-nft-xfrm=y
           CONFIG_PACKAGE_kmod-tcp-bbr=y
-          CONFIG_PACKAGE_kmod-ikconfig=y
-          CONFIG_PACKAGE_kmod-nf-conntrack-netlink=y
-          CONFIG_PACKAGE_kmod-nf-ipt=y
-          CONFIG_PACKAGE_kmod-nf-nat=y
+          CONFIG_PACKAGE_kmod-nft-synproxy=y
           CONFIG_PACKAGE_kmod-sched-cake=y
           CONFIG_PACKAGE_kmod-sched-fq_codel=y
 
           # === SQM/QoS 流量管理 ===
           CONFIG_PACKAGE_luci-app-sqm=y
-          CONFIG_PACKAGE_luci-app-nfqosm=y
           CONFIG_PACKAGE_luci-app-nft-qos=y
-
-          # === 广告拦截增强 ===
-          CONFIG_PACKAGE_luci-app-simple-adblock=y
 
           # === Passwall 内核 ===
           CONFIG_PACKAGE_xray-core=y
@@ -162,9 +142,8 @@ jobs:
           CONFIG_PACKAGE_trojan=y
           CONFIG_PACKAGE_shadowsocks-libev=y
           CONFIG_PACKAGE_v2ray-plugin=y
-          CONFIG_PACKAGE_trojan-go=y
 
-          # === APT 依赖 ===
+          # === 依赖库 ===
           CONFIG_PACKAGE_libdns=y
           CONFIG_PACKAGE_libdaemon=y
           CONFIG_PACKAGE_libev=y
@@ -189,7 +168,7 @@ jobs:
           EOF
           make defconfig
           echo '--- selected packages ---'
-          grep '=y' .config | grep -E 'CONFIG_PACKAGE_(openclash|passwall|argon|material|edge|alpha|aurora|homebox|smartdns|adguardhome|wireguard|frps|zerotier|xray|hysteria|sing-box|sqm|docker)' | sort
+          grep '=y' .config | grep -E 'CONFIG_PACKAGE_(openclash|passwall|argon|bootstrap|smartdns|wireguard|frps|zerotier|xray|hysteria|sing-box|sqm|docker)' | sort
 
       - name: Patch QModem (no destructive PCIe rescan)
         run: |
