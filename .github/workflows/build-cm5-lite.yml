@@ -40,22 +40,20 @@ jobs:
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
-          # External theme feeds - clone + symlink into package/feeds
-          git clone --depth 1 https://github.com/derisamedia/luci-theme-alpha.git feeds/alpha
-          git clone --depth 1 https://github.com/animegasan/luci-app-alpha-config.git feeds/alpha-config
-          git clone --depth 1 https://github.com/eamonxg/luci-theme-aurora.git feeds/aurora
-          echo '--- feeds dir ---'
-          ls -la feeds/
-          echo '--- theme Makefiles ---'
-          head -3 feeds/alpha/Makefile feeds/alpha-config/Makefile feeds/aurora/Makefile 2>/dev/null
-
-          # Make defconfig discovers packages via package/feeds/*
-          mkdir -p package/feeds/alpha package/feeds/alpha-config package/feeds/aurora
-          ln -sf ../../feeds/alpha         package/feeds/alpha/luci-theme-alpha
-          ln -sf ../../feeds/alpha-config  package/feeds/alpha-config/luci-app-alpha-config
-          ln -sf ../../feeds/aurora        package/feeds/aurora/luci-theme-aurora
-          echo '--- package/feeds ---'
-          ls -la package/feeds/ | grep -E 'alpha|aurora'
+          # External theme packages - clone DIRECTLY into package/
+          # (bypasses fragile feeds.conf + package/feeds symlink)
+          git clone --depth 1 https://github.com/derisamedia/luci-theme-alpha.git package/luci-theme-alpha
+          git clone --depth 1 https://github.com/animegasan/luci-app-alpha-config.git package/luci-app-alpha-config
+          git clone --depth 1 https://github.com/eamonxg/luci-theme-aurora.git package/luci-theme-aurora
+          echo '=== package/ tree ==='
+          ls -la package/ | grep -E 'alpha|aurora'
+          echo '=== luci.mk exists? ==='
+          ls -la feeds/luci/luci.mk 2>&1 || echo 'MISSING!'
+          echo '=== theme Makefile deps ==='
+          grep -H 'include.*rules.mk\|include.*luci.mk\|include.*package.mk' \
+            package/luci-theme-alpha/Makefile \
+            package/luci-app-alpha-config/Makefile \
+            package/luci-theme-aurora/Makefile
 
           cat > .config <<'EOF'
           CONFIG_TARGET_rockchip=y
@@ -189,10 +187,19 @@ jobs:
           CONFIG_PACKAGE_pdnsd-alt=y
           EOF
           make defconfig
-          echo '--- selected themes ---'
-          grep -E 'CONFIG_PACKAGE_luci-theme-(argon|bootstrap|alpha|aurora)' .config
-          echo '--- selected packages ---'
-          grep '=y' .config | grep -E 'CONFIG_PACKAGE_(openclash|passwall|argon|bootstrap|alpha-config|alpha|aurora|smartdns|wireguard|frps|zerotier|xray|hysteria|sing-box|sqm|docker)' | sort
+
+          # VERIFY themes survived defconfig (OpenWrt silently drops
+          # CONFIG_PACKAGE_*=y when it can't find the package)
+          echo ''
+          echo '=== THEME VERIFICATION ==='
+          for p in luci-theme-alpha luci-app-alpha-config luci-theme-aurora luci-theme-argon luci-theme-bootstrap; do
+            if grep -q "CONFIG_PACKAGE_${p}=y" .config; then
+              echo "  OK : CONFIG_PACKAGE_${p}=y"
+            else
+              echo "  MISSING : CONFIG_PACKAGE_${p} (defconfig dropped it!)"
+            fi
+          done
+          echo '=== END THEME VERIFICATION ==='
 
       - name: Patch QModem (no destructive PCIe rescan)
         run: |
