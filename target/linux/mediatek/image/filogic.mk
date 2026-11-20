@@ -774,17 +774,17 @@ define Device/cpe_ykm
   DEVICE_MODEL := YKM 5G CPE
   DEVICE_DTS := mt7981-cpe-ykm
   DEVICE_DTS_DIR := ../dts
+  DEVICE_DTS_LOADADDR := 0x47000000
   DEVICE_PACKAGES := kmod-mt_wifi mtwifi-cfg luci-app-mtwifi-cfg kmod-usb3 \
 	qmodem qmodem_monitor luci-app-qmodem luci-app-qmodem-sms luci-app-qmodem-ttl
-  BLOCKSIZE := 64k
-  PAGESIZE := 1
-  SUBPAGESIZE := 1
-  VID_HDR_OFFSET := 64
   IMAGE_SIZE := 31872k
-  KERNEL_IN_UBI := 1
-  IMAGES := sysupgrade.bin factory.bin
-  IMAGE/sysupgrade.bin := append-ubi | check-size $$$$(IMAGE_SIZE)
-  IMAGE/factory.bin := append-ubi | check-size $$$$(IMAGE_SIZE)
+  IMAGES := sysupgrade.bin
+  KERNEL := kernel-bin | lzma | \
+	fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb
+  KERNEL_INITRAMFS := kernel-bin | lzma | \
+	fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb with-initrd | pad-to 64k
+  IMAGE/sysupgrade.bin := append-kernel | pad-to 128k | append-rootfs | \
+	pad-rootfs | check-size | append-metadata
 endef
 TARGET_DEVICES += cpe_ykm
 

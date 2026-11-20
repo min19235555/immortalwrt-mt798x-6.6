@@ -196,8 +196,8 @@
 			};
 
 			partition@e0000 {
-				label = "ubi";
-				compatible = "linux,ubi";
+				compatible = "denx,fit";
+				label = "fit";
 				reg = <0xe0000 0x1f20000>;
 			};
 		};

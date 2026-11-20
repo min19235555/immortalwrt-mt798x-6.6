@@ -163,7 +163,7 @@ platform_do_upgrade() {
 		default_do_upgrade "$1"
 		;;
 	cpe,ykm)
-		PART_NAME="ubi"
+		PART_NAME="fit"
 		default_do_upgrade "$1"
 		;;
 	dlink,aquila-pro-ai-m30-a1|\
@@ -227,13 +227,6 @@ platform_check_image() {
 	[ "$#" -gt 1 ] && return 1
 
 	case "$board" in
-	cpe,ykm)
-		[ "$magic" != "55424923" ] && {
-			echo "Invalid image type."
-			return 1
-		}
-		return 0
-		;;
 	bananapi,bpi-r3|\
 	bananapi,bpi-r3-mini|\
 	bananapi,bpi-r4|\
